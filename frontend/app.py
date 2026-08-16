@@ -5,13 +5,13 @@ import requests
 # Base URL of the Flask backend inside the Docker network
 BACKEND_URL = "http://backend:7860"
 
-# Set the title of the Streamlit app
+# Set the title of the Streamlit application
 st.title("SuperKart Sales Prediction App")
 
-# Section for sales prediction
+# Section for sales prediction input
 st.subheader("Sales Prediction")
 
-# Collect user input for product and store data
+# Collect user input for various product and store features using Streamlit widgets
 Product_Weight = st.number_input("Product Weight", min_value=0.0, value=12.66)
 Product_Sugar_Content = st.selectbox("Product Sugar Content", ["Low Sugar", "Regular", "No Sugar"])
 Product_Allocated_Area = st.number_input("Product Allocated Area", min_value=0.0, value=0.04)
@@ -29,7 +29,8 @@ Product_Type = st.selectbox("Product Type", [
 Product_Category = st.selectbox("Product Category", ["DR","FD", "NC"])
 Product_Perishability = st.selectbox("Product Perishability", ["Perishable", "Non Perishable"])
 
-# Construct the data payload, matching the backend API's expected features
+# Construct the data payload as a dictionary,
+# ensuring feature names match the backend API's expected input.
 product_data = {
     "Product_Weight": Product_Weight,
     "Product_Sugar_Content": Product_Sugar_Content,
@@ -44,13 +45,16 @@ product_data = {
 }
 
 
-# Make prediction when the "Predict" button is clicked
+# Action to take when the "Predict" button is clicked
 if st.button("Predict", type="primary"):
-    # Sending the individual product data dictionary to the Flask API endpoint
+    # Send a POST request with the collected product data to the Flask API endpoint
     response = requests.post(f"{BACKEND_URL}/v1/predict", json=product_data)
+    # Check if the request was successful (HTTP status code 200)
     if response.status_code == 200:
+        # Extract the 'Sales' prediction from the JSON response
         prediction = response.json()['Sales']
+        # Display the predicted sales amount to the user
         st.success(f"Predicted Product Sales Total: {round(prediction, 2)}")
     else:
+        # Display an error message if the API call was unsuccessful
         st.error(f"Error: {response.status_code}. Unable to connect to the prediction API.")
-      
