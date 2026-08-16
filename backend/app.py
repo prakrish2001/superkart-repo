@@ -7,21 +7,22 @@ from flask import Flask, request, jsonify  # For creating the Flask API
 # Initialize Flask app with a name
 superkart_api = Flask("Superkart Sale Prediction")
 
-# Load the trained model pipeline
+# Load the trained model pipeline from the specified path
 model = joblib.load("../backend_files/superkart_model_v1_0.joblib")
 
-# Define a route for the home page
+# Define a route for the home page of the API
 @superkart_api.get('/')
 def home():
     return "Welcome to the SuperKart Sales Prediction API!"
 
-# Define an endpoint for predict sales
+# Define an endpoint for predicting sales using a POST request
 @superkart_api.post('/v1/predict')
 def predict_sales():
-    # Get JSON data from the request
+    # Get JSON data from the incoming request body
     data = request.get_json()
 
-    # Extract relevant features from the input data, matching the model's training features.
+    # Extract relevant features from the input data dictionary,
+    # ensuring they match the exact features the model was trained on.
     sample = {
         'Product_Weight': data['Product_Weight'],
         'Product_Sugar_Content': data['Product_Sugar_Content'],
@@ -35,16 +36,16 @@ def predict_sales():
         'Product_Perishability': data['Product_Perishability']
     }
 
-    # Convert the extracted data into a DataFrame
+    # Convert the extracted dictionary into a pandas DataFrame, as expected by the model
     input_data = pd.DataFrame([sample])
 
-    # Make a prediction using the trained model
+    # Make a prediction using the loaded model and convert the result to a list (then take the first element)
     prediction = model.predict(input_data).tolist()[0]
 
-    # Return the prediction as a JSON response
+    # Return the prediction as a JSON response with the key 'Sales'
     return jsonify({'Sales': prediction})
 
-# Run the Flask app in debug mode
+# Run the Flask app in debug mode if the script is executed directly
 if __name__ == '__main__':
     superkart_api.run(debug=True)
 print("Successfully created backend_files/app.py")
